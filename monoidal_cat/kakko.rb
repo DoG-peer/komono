@@ -64,6 +64,32 @@ class Kakko
 		right = Kakko.new(@string[(div+1)...-1])
 		return [[0,div,@size * 3 -1]] + left.to_a.map{|val|val.map{|x|x+1}} + right.to_a.map{|val|val.map{|x|x+div+1}}
 	end
+	def next_steps
+		#((A,B),C)→(A,(B,C))
+		val = []
+		ar = self.to_a.sort{|x,y| x[0] <=> y[0]}
+		ar.each_cons(2) do |x,y|
+			if x[0] + 1 == y[0]
+				val << @string[0..x[0]] + @string[(y[0]+1)..y[1]] + "(" + @string[(y[1]+1)..(y[2]-1)] + @string[x[1]..x[2]] + ")" + @string[x[2]+1..-1] 
+			end
+		end
+		return val.map{|st| Kakko.new(st)}
+	end
+
+	def back_steps
+		#(A,(B,C))→((A,B),C)
+		val = []
+		ar = self.to_a.sort{|x,y| y[2] <=> x[2]}
+		ar.each_cons(2) do |x,y|
+			if x[2] - 1 == y[2]
+				val << @string[0..x[0]] + "(" + @string[(x[0]+1)..(x[1])] + @string[(y[0]+1)..y[1]-1] + ")" + @string[y[1]..y[2]] + @string[x[2]..-1] 
+			end
+		end
+		return val.map{|st| Kakko.new(st)}
+	end
+	def ==(y)
+		@string == y.string
+	end
 end
 #以下サンプル，適当にコメントアウトをはずして実行してください．
 =begin
@@ -77,10 +103,29 @@ end
 p ar
 =end
 
+#=begin
+#あんまり大きな数字を入れてはいけません．
+num = gets.to_i
+ar = [Kakko.new(num,"start")]
+until ar == []
+	puts ar.map(&:string)
+	ar = ar.map(&:next_steps).flatten.map{|x|x.string}.uniq.map{|st| Kakko.new(st)}
+	puts "=>" if ar != []
+end
+system('pause')
+#=end
+
 =begin
-x =  Kakko.new("((,),(,))")
+#x =  Kakko.new("((,),(,))")
+x = Kakko.new(10,"rand")
 p x
 p Kakko.new(x.to_a)
+puts x.string
+puts
+puts x.next_steps.map(&:string)
+puts 
+puts x.back_steps.map(&:string)
+
 =end
 
 =begin
